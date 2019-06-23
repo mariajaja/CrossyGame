@@ -29,14 +29,22 @@ class Game:
         background_image = pygame.image.load(image_path)
         self.image = pygame.transform.scale(background_image, (width, height))
 
-    def run_game_loop(self):
+    def run_game_loop(self, level):
         is_game_over = False
         did_win = False
         direction = 0
 
         # Create characters and objects for game
         player_character = PlayerCharacter('images/player.png', 275, 500, 50, 50)
-        enemy_0 = EnemyCharacter('images/enemy0.png', 20, 300, 50, 50)
+        enemy_0 = EnemyCharacter('images/enemy0.png', 20, 400, 50, 50)
+        enemy_0.SPEED *= (level / 2)
+
+        enemy_1 = EnemyCharacter('images/enemy1.png', self.width - 50, 100, 50, 50)
+        enemy_1.SPEED *= (level / 2)
+
+        enemy_2 = EnemyCharacter('images/enemy2.png', 20, 250, 75, 50)
+        enemy_2.SPEED *= (level / 2)
+        
         treasure = GameObject('images/treasure.png', 275, 50, 50, 50)
         
         while not is_game_over:
@@ -75,6 +83,13 @@ class Game:
             # Draw enemy at new position
             enemy_0.draw(self.game_screen)
 
+            if level > 2:
+                enemy_1.move(self.width)
+                enemy_1.draw(self.game_screen)
+            if level > 4:
+                enemy_2.move(self.width)
+                enemy_2.draw(self.game_screen)                
+
             # End game if collision between enemy or treasure
             if player_character.detect_collision(enemy_0):
                 is_game_over = True
@@ -90,7 +105,7 @@ class Game:
             pygame.display.update()
             clock.tick(self.TICK_RATE)
         if did_win:
-            self.run_game_loop()
+            self.run_game_loop(level + 1)
         else:
             return
 
@@ -141,11 +156,13 @@ class PlayerCharacter(GameObject):
             return False
         elif self.y_pos + self.height < other_body.y_pos:
             return False
+        
         # Checks if not overlapping in x-axis
         if self.x_pos > other_body.x_pos + other_body.width:
             return False
         elif self.x_pos + self.width < other_body.x_pos:
             return False
+        
         # Collided.
         return True
             
@@ -153,7 +170,7 @@ class PlayerCharacter(GameObject):
 # Class to represent enemies moving left to right and right to left
 class EnemyCharacter(GameObject):
 
-    SPEED = 10
+    SPEED = 4
     
     def __init__(self, image_path, x, y, width, height):
         super().__init__(image_path, x, y, width, height)
@@ -171,7 +188,7 @@ pygame.init()
 
 # create a new instance of a Game
 new_game = Game('images/background.png', SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT)
-new_game.run_game_loop()
+new_game.run_game_loop(1)
 
 # Quit game  
 pygame.quit()
