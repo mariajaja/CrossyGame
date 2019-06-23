@@ -91,7 +91,7 @@ class Game:
                 enemy_2.draw(self.game_screen)                
 
             # End game if collision between enemy or treasure
-            if player_character.detect_collision(enemy_0):
+            if player_character.detect_collision(enemy_0) or player_character.detect_collision(enemy_1) or player_character.detect_collision(enemy_2):
                 is_game_over = True
                 did_win = False
                 self.run_text('YOU LOSE!')
