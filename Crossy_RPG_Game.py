@@ -8,13 +8,15 @@ SCREEN_HEIGHT = 600
 WHITE_COLOR = (255, 255, 255)   
 BLACK_COLOR = (0, 0, 0)
 clock = pygame.time.Clock()
+pygame.font.init()
+font = pygame.font.SysFont('comicsans', 75)
 
 class Game:
     
     TICK_RATE = 60
 
     # Initializer for the game class to set up title, width and height
-    def __init__(self, title, width, height):
+    def __init__(self, image_path, title, width, height):
         self.title = title
         self.width = width
         self.height = height
@@ -24,10 +26,15 @@ class Game:
         self.game_screen.fill(WHITE_COLOR)
         pygame.display.set_caption(title)
 
+        background_image = pygame.image.load(image_path)
+        self.image = pygame.transform.scale(background_image, (width, height))
+
     def run_game_loop(self):
         is_game_over = False
+        did_win = False
         direction = 0
 
+        # Create characters and objects for game
         player_character = PlayerCharacter('images/player.png', 275, 500, 50, 50)
         enemy_0 = EnemyCharacter('images/enemy0.png', 20, 300, 50, 50)
         treasure = GameObject('images/treasure.png', 275, 50, 50, 50)
@@ -53,6 +60,7 @@ class Game:
                 print(event)
                 
             self.game_screen.fill(WHITE_COLOR)
+            self.game_screen.blit(self.image, (0, 0))
 
             # Draw treasure
             treasure.draw(self.game_screen)
@@ -70,11 +78,29 @@ class Game:
             # End game if collision between enemy or treasure
             if player_character.detect_collision(enemy_0):
                 is_game_over = True
+                did_win = False
+                self.run_text('YOU LOSE!')
+                break
             elif player_character.detect_collision(treasure):
                 is_game_over = True
+                did_win = True
+                self.run_text('YOU WIN!')
+                break
             
             pygame.display.update()
             clock.tick(self.TICK_RATE)
+        if did_win:
+            self.run_game_loop()
+        else:
+            return
+
+    # Function to run text after a collision  
+    def run_text(self, text):
+        text = font.render(text, True, BLACK_COLOR)
+        self.game_screen.blit(text, (175, 250))
+        pygame.display.update()
+        clock.tick(1)
+        
             
 class GameObject:
 
@@ -144,9 +170,8 @@ class EnemyCharacter(GameObject):
 pygame.init()
 
 # create a new instance of a Game
-new_game = Game(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT)
+new_game = Game('images/background.png', SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT)
 new_game.run_game_loop()
-
 
 # Quit game  
 pygame.quit()
