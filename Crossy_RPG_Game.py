@@ -30,6 +30,8 @@ class Game:
 
         player_character = PlayerCharacter('images/player.png', 275, 500, 50, 50)
         enemy_0 = EnemyCharacter('images/enemy0.png', 20, 300, 50, 50)
+        treasure = GameObject('images/treasure.png', 275, 50, 50, 50)
+        
         while not is_game_over:
 
             for event in pygame.event.get():
@@ -51,12 +53,25 @@ class Game:
                 print(event)
                 
             self.game_screen.fill(WHITE_COLOR)
+
+            # Draw treasure
+            treasure.draw(self.game_screen)
             
+            # Update player position
             player_character.move(direction, self.height)
+            # Draw player at new position
             player_character.draw(self.game_screen)
 
+            # Update enemy position
             enemy_0.move(self.width)
+            # Draw enemy at new position
             enemy_0.draw(self.game_screen)
+
+            # End game if collision between enemy or treasure
+            if player_character.detect_collision(enemy_0):
+                is_game_over = True
+            elif player_character.detect_collision(treasure):
+                is_game_over = True
             
             pygame.display.update()
             clock.tick(self.TICK_RATE)
@@ -93,6 +108,21 @@ class PlayerCharacter(GameObject):
         # Make sure the character never goes past the bottom of the screen    
         if self.y_pos >= max_height - 50:
             self.y_pos = max_height - 50
+
+    def detect_collision(self, other_body):
+        # Checks if not overlapping in y-axis
+        if self.y_pos > other_body.y_pos + other_body.height:
+            return False
+        elif self.y_pos + self.height < other_body.y_pos:
+            return False
+        # Checks if not overlapping in x-axis
+        if self.x_pos > other_body.x_pos + other_body.width:
+            return False
+        elif self.x_pos + self.width < other_body.x_pos:
+            return False
+        # Collided.
+        return True
+            
 
 # Class to represent enemies moving left to right and right to left
 class EnemyCharacter(GameObject):
